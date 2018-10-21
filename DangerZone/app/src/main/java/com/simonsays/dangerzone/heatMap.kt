@@ -1,27 +1,30 @@
 package com.simonsays.dangerzone
 
-import android.support.v7.app.AppCompatActivity
+import android.content.pm.PackageManager
 import android.os.Bundle
-
+import android.support.v4.app.ActivityCompat
+import android.support.v7.app.AppCompatActivity
+import android.widget.Toast
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.MarkerOptions
-import android.widget.Toast
 import com.google.android.gms.maps.model.CameraPosition
+import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.TileOverlayOptions
 import com.google.maps.android.heatmaps.HeatmapTileProvider
 import org.json.JSONArray
 import org.json.JSONException
 import java.util.*
-import kotlin.math.hypot
 
 class heatMap : AppCompatActivity(), OnMapReadyCallback {
 
     private lateinit var mMap: GoogleMap
     private lateinit var dangerPoints: List<LatLng>
+    companion object {
+        private const val LOCATION_PERMISSION_REQUEST_CODE = 1
+    }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,6 +37,7 @@ class heatMap : AppCompatActivity(), OnMapReadyCallback {
             val Crimes = result.getJSONArray("crimes")
             addHeatMap(Crimes)
         }
+
     }
 
     /**
@@ -51,8 +55,23 @@ class heatMap : AppCompatActivity(), OnMapReadyCallback {
         //lat=47.6614244&lon=-122.2683743
         val uw = LatLng(47.6553, -122.3035)
         mMap.moveCamera(CameraUpdateFactory.newCameraPosition(CameraPosition.fromLatLngZoom(uw, 14f)))
-        mMap.addMarker(MarkerOptions().position(uw).title("Marker in Sydney"))
         mMap.moveCamera(CameraUpdateFactory.newLatLng(uw))
+        mMap.uiSettings.isZoomGesturesEnabled =false
+        setUpMap()
+    }
+
+    private fun setUpMap() {
+        if (ActivityCompat.checkSelfPermission(this,
+                android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE)
+
+            return
+        }
+        else{
+            mMap.isMyLocationEnabled = true
+
+        }
     }
 
     fun addHeatMap(Crimes:JSONArray) {
