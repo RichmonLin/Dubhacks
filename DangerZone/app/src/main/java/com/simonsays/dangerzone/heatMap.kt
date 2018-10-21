@@ -1,6 +1,9 @@
 package com.simonsays.dangerzone
 
 import android.content.pm.PackageManager
+import android.location.Location
+import android.location.LocationListener
+import android.location.LocationManager
 import android.os.Bundle
 import android.support.v4.app.ActivityCompat
 import android.support.v7.app.AppCompatActivity
@@ -21,10 +24,13 @@ class heatMap : AppCompatActivity(), OnMapReadyCallback {
 
     private lateinit var mMap: GoogleMap
     private lateinit var dangerPoints: List<LatLng>
+    private var locationManager : LocationManager? = null
+    var lat = 47.6614244
+    var lon = -122.2683743
+
     companion object {
         private const val LOCATION_PERMISSION_REQUEST_CODE = 1
     }
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,9 +43,20 @@ class heatMap : AppCompatActivity(), OnMapReadyCallback {
             val Crimes = result.getJSONArray("crimes")
             addHeatMap(Crimes)
         }
+        // Create persistent LocationManager reference
+        locationManager = getSystemService(LOCATION_SERVICE) as LocationManager?
 
     }
 
+    private val locationListener: LocationListener = object : LocationListener {
+        override fun onLocationChanged(location: Location) {
+            lon = location.longitude
+            lat = location.latitude
+        }
+        override fun onStatusChanged(provider: String, status: Int, extras: Bundle) {}
+        override fun onProviderEnabled(provider: String) {}
+        override fun onProviderDisabled(provider: String) {}
+    }
     /**
      * Manipulates the map once available.
      * This callback is triggered when the map is ready to be used.
@@ -56,25 +73,27 @@ class heatMap : AppCompatActivity(), OnMapReadyCallback {
         val uw = LatLng(47.6553, -122.3035)
         mMap.moveCamera(CameraUpdateFactory.newCameraPosition(CameraPosition.fromLatLngZoom(uw, 14f)))
         mMap.moveCamera(CameraUpdateFactory.newLatLng(uw))
-        mMap.uiSettings.isZoomGesturesEnabled =false
+        mMap.uiSettings.isZoomGesturesEnabled = false
         setUpMap()
     }
 
     private fun setUpMap() {
-        if (ActivityCompat.checkSelfPermission(this,
-                android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this,
-                arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE)
-
+        if (ActivityCompat.checkSelfPermission(
+                this,
+                android.Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE
+            )
             return
-        }
-        else{
+        } else {
             mMap.isMyLocationEnabled = true
-
         }
     }
 
-    fun addHeatMap(Crimes:JSONArray) {
+    fun addHeatMap(Crimes: JSONArray) {
         lateinit var list: List<LatLng>
         lateinit var listTitle: List<String>
         lateinit var listTime: List<String>
@@ -134,26 +153,24 @@ class heatMap : AppCompatActivity(), OnMapReadyCallback {
         return list
     }
 
-
-    /*
-   fun checkIfNearCrime(resource: Int): boolean {
-       val Lat = getUserLocation().latitude
-       val Lon = getUserLocation().longitude
-
+/*
+    fun checkIfNearCrime(resource: Int) {
         for (point in dangerPoints) {
             val pointLat = point.latitude
             val pointLon = point.longitude
 
-            if (Math.abs(Lat - pointLat) < 0.00005 && Math.abs(Lon - pointLon) < 0.0005) {
-                return true
-            }
-        }
-       return false
-    }
-    // create a method to make a push notification (vibration)
-    fun pushNotification() : {
+            val distance = Math.hypot(Math.abs(lat-pointLat), Math.abs(lon - pointLon))
+            val miles = distance
 
+          if (Math.abs(Lat - pointLat) < 0.00005 && Math.abs(Lon - pointLon) < 0.0005) {
+              return true
+          }
+        }
     }
+
+   fun pushNotification(): {
+
+   }
+}
 */
 
-}
