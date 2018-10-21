@@ -9,6 +9,12 @@ import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
+import android.widget.Toast
+import com.google.android.gms.maps.model.TileOverlayOptions
+import com.google.maps.android.heatmaps.HeatmapTileProvider
+import org.json.JSONArray
+import org.json.JSONException
+import java.util.*
 
 class heatMap : AppCompatActivity(), OnMapReadyCallback {
 
@@ -21,6 +27,9 @@ class heatMap : AppCompatActivity(), OnMapReadyCallback {
         val mapFragment = supportFragmentManager
             .findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
+        DataProvider.getData { result ->
+            return@getData
+        }
     }
 
     /**
@@ -39,5 +48,34 @@ class heatMap : AppCompatActivity(), OnMapReadyCallback {
         val sydney = LatLng(-34.0, 151.0)
         mMap.addMarker(MarkerOptions().position(sydney).title("Marker in Sydney"))
         mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney))
+    }
+
+    fun addHeatMap() {
+        var list: List<LatLng>? = null
+        try {
+            //list = readItems(R.raw.crimes) //change parameter if we want
+        } catch (e: JSONException) {
+            Toast.makeText(this, "Problem reading list of locations.", Toast.LENGTH_LONG).show()
+        }
+        val mProvider = HeatmapTileProvider.Builder()
+            .data(list)
+            .build()
+        // if you ever need the mOverlay then please set this variable
+        // equal to this line
+        mMap.addTileOverlay(TileOverlayOptions().tileProvider(mProvider))
+    }
+
+    fun readItems(resource: Int): ArrayList<LatLng> {
+        val list = ArrayList<LatLng>()
+        val inputStream  = getResources().openRawResource(resource)
+        val json = Scanner(inputStream).useDelimiter("\\A").next()
+        val array = JSONArray(json)
+        for (i in 0..array.length() - 1) {
+            val coord = array.getJSONObject(i)
+            val lat = coord.getDouble("lat")
+            val lng = coord.getDouble("lon")
+            list.add(LatLng(lat, lng))
+        }
+        return list
     }
 }
