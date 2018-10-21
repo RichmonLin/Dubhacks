@@ -16,6 +16,7 @@ import com.google.maps.android.heatmaps.HeatmapTileProvider
 import org.json.JSONArray
 import org.json.JSONException
 import java.util.*
+import kotlin.math.hypot
 
 class heatMap : AppCompatActivity(), OnMapReadyCallback {
 
@@ -83,4 +84,26 @@ class heatMap : AppCompatActivity(), OnMapReadyCallback {
         }
         return list
     }
+
+   fun checkIfNearCrime(resource: Int): boolean {
+       val Lat = getUserLocation().latitude
+       val Lon = getUserLocation().longitude
+
+        for (point in dangerPoints) {
+            val pointLat = point.latitude
+            val pointLon = point.longitude
+
+            if (Math.abs(Lat - pointLat) < 0.00005 && Math.abs(Lon - pointLon) < 0.0005) {
+                return true
+            }
+        }
+       return false
+    }
+
+    // create a method to make a push notification (vibration)
+    fun pushNotification() : {
+        
+    }
+
+
 }
