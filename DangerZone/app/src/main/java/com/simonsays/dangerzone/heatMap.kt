@@ -1,26 +1,30 @@
 package com.simonsays.dangerzone
 
-import android.support.v7.app.AppCompatActivity
+import android.content.pm.PackageManager
 import android.os.Bundle
-
+import android.support.v4.app.ActivityCompat
+import android.support.v7.app.AppCompatActivity
+import android.widget.Toast
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.MarkerOptions
-import android.widget.Toast
 import com.google.android.gms.maps.model.TileOverlayOptions
 import com.google.maps.android.heatmaps.HeatmapTileProvider
 import org.json.JSONArray
 import org.json.JSONException
 import java.util.*
-import kotlin.math.hypot
 
 class heatMap : AppCompatActivity(), OnMapReadyCallback {
 
     private lateinit var mMap: GoogleMap
     private lateinit var dangerPoints: List<LatLng>
+    companion object {
+        private const val LOCATION_PERMISSION_REQUEST_CODE = 1
+    }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,6 +37,7 @@ class heatMap : AppCompatActivity(), OnMapReadyCallback {
             val Crimes = result.getJSONArray("crimes")
             addHeatMap(Crimes)
         }
+
     }
 
     /**
@@ -46,25 +51,50 @@ class heatMap : AppCompatActivity(), OnMapReadyCallback {
      */
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
-
         // Add a marker in Sydney and move the camera
         //lat=47.6614244&lon=-122.2683743
         val uw = LatLng(47.6553, -122.3035)
-        mMap.addMarker(MarkerOptions().position(uw).title("Marker in Sydney"))
+        mMap.moveCamera(CameraUpdateFactory.newCameraPosition(CameraPosition.fromLatLngZoom(uw, 14f)))
         mMap.moveCamera(CameraUpdateFactory.newLatLng(uw))
+        mMap.uiSettings.isZoomGesturesEnabled =false
+        setUpMap()
+    }
+
+    private fun setUpMap() {
+        if (ActivityCompat.checkSelfPermission(this,
+                android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE)
+
+            return
+        }
+        else{
+            mMap.isMyLocationEnabled = true
+
+        }
     }
 
     fun addHeatMap(Crimes:JSONArray) {
         lateinit var list: List<LatLng>
+        lateinit var listTitle: List<String>
+        lateinit var listTime: List<String>
+
         try {
             list = readItems(Crimes) //change parameter if we want
+            listTitle = readTitles(Crimes)
+            listTime = readTimes(Crimes)
         } catch (e: JSONException) {
             Toast.makeText(this, "Problem reading list of locations.", Toast.LENGTH_LONG).show()
         }
 
         dangerPoints = list
+/*
+        for (i in 0..list.size- 1) {
+            mMap.addMarker(MarkerOptions().position(list.get(i)).title(listTitle.get(i)))
+        }
+*/
 
-        val mProvider = HeatmapTileProvider.Builder()
+        val mProvider = HeatmapTileProvider.Builder().radius(50)
             .data(list)
             .build()
 
@@ -84,6 +114,28 @@ class heatMap : AppCompatActivity(), OnMapReadyCallback {
         return list
     }
 
+    fun readTitles(array: JSONArray): ArrayList<String> {
+        val list = ArrayList<String>()
+        for (i in 0..array.length() - 1) {
+            val crime = array.getJSONObject(i)
+            val title = crime.getString("type")
+            list.add(title)
+        }
+        return list
+    }
+
+    fun readTimes(array: JSONArray): ArrayList<String> {
+        val list = ArrayList<String>()
+        for (i in 0..array.length() - 1) {
+            val time = array.getJSONObject(i)
+            val timeStamp = time.getString("date").substring(9)
+            list.add(timeStamp)
+        }
+        return list
+    }
+
+
+    /*
    fun checkIfNearCrime(resource: Int): boolean {
        val Lat = getUserLocation().latitude
        val Lon = getUserLocation().longitude
@@ -98,11 +150,10 @@ class heatMap : AppCompatActivity(), OnMapReadyCallback {
         }
        return false
     }
-
     // create a method to make a push notification (vibration)
     fun pushNotification() : {
 
     }
-
+*/
 
 }
