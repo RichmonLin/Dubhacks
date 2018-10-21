@@ -153,7 +153,7 @@ class heatMap : AppCompatActivity(), OnMapReadyCallback {
         return list
     }
 
-/*
+
     fun checkIfNearCrime(resource: Int) {
         for (point in dangerPoints) {
             val pointLat = point.latitude
@@ -161,16 +161,14 @@ class heatMap : AppCompatActivity(), OnMapReadyCallback {
 
             val distance = Math.hypot(Math.abs(lat-pointLat), Math.abs(lon - pointLon))
             val miles = distance
-
-          if (Math.abs(Lat - pointLat) < 0.00005 && Math.abs(Lon - pointLon) < 0.0005) {
-              return true
-          }
+ }
         }
     }
 
-   fun pushNotification(): {
 
-   }
-}
-*/
+//    // create a method to make a push notification (vibration)
+//    fun pushNotification(): {
+//
+//    }
+
 
