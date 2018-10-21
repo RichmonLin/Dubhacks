@@ -10,6 +10,7 @@ import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import android.widget.Toast
+import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.TileOverlayOptions
 import com.google.maps.android.heatmaps.HeatmapTileProvider
 import org.json.JSONArray
@@ -45,7 +46,7 @@ class heatMap : AppCompatActivity(), OnMapReadyCallback {
      */
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
-
+        mMap.moveCamera(CameraUpdateFactory.newCameraPosition(CameraPosition()))
         // Add a marker in Sydney and move the camera
         //lat=47.6614244&lon=-122.2683743
         val uw = LatLng(47.6553, -122.3035)
@@ -63,7 +64,7 @@ class heatMap : AppCompatActivity(), OnMapReadyCallback {
 
         dangerPoints = list
 
-        val mProvider = HeatmapTileProvider.Builder()
+        val mProvider = HeatmapTileProvider.Builder().radius(50)
             .data(list)
             .build()
 

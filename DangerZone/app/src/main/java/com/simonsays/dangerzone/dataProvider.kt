@@ -9,7 +9,7 @@ import org.json.JSONObject
 object DataProvider{
     fun getData(completion: (JSONObject) -> Unit) {
         val url =
-            "https://api.spotcrime.com/crimes.json?lat=47.6614244&lon=-122.2683743&radius=2&key=heythisisforpublicspotcrime.comuse-forcommercial-or-research-use-call-877.410.1607-or-email-pyrrhus-at-spotcrime.com"
+            "https://api.spotcrime.com/crimes.json?lat=47.6614244&lon=-122.2683743&radius=0.05&key=heythisisforpublicspotcrime.comuse-forcommercial-or-research-use-call-877.410.1607-or-email-pyrrhus-at-spotcrime.com"
 
         url.httpGet().responseJson{request,response,result->
             when(result){
