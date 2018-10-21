@@ -78,4 +78,10 @@ class heatMap : AppCompatActivity(), OnMapReadyCallback {
         }
         return list
     }
+
+
+   func checkIfNearCrime(resource: Int): boolean {
+        ArrayList<LatLng> crimes = readItems()
+    }
+
 }
