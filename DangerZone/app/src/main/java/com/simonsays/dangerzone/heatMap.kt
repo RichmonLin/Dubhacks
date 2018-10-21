@@ -19,6 +19,7 @@ import java.util.*
 class heatMap : AppCompatActivity(), OnMapReadyCallback {
 
     private lateinit var mMap: GoogleMap
+    private lateinit var dangerPoints: List<LatLng>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -28,7 +29,8 @@ class heatMap : AppCompatActivity(), OnMapReadyCallback {
             .findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
         DataProvider.getData { result ->
-            return@getData
+            val Crimes = result.getJSONArray("crimes")
+            addHeatMap(Crimes)
         }
     }
 
@@ -45,31 +47,33 @@ class heatMap : AppCompatActivity(), OnMapReadyCallback {
         mMap = googleMap
 
         // Add a marker in Sydney and move the camera
-        val sydney = LatLng(-34.0, 151.0)
-        mMap.addMarker(MarkerOptions().position(sydney).title("Marker in Sydney"))
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney))
+        //lat=47.6614244&lon=-122.2683743
+        val uw = LatLng(47.6553, -122.3035)
+        mMap.addMarker(MarkerOptions().position(uw).title("Marker in Sydney"))
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(uw))
     }
 
-    fun addHeatMap() {
-        var list: List<LatLng>? = null
+    fun addHeatMap(Crimes:JSONArray) {
+        lateinit var list: List<LatLng>
         try {
-            //list = readItems(R.raw.crimes) //change parameter if we want
+            list = readItems(Crimes) //change parameter if we want
         } catch (e: JSONException) {
             Toast.makeText(this, "Problem reading list of locations.", Toast.LENGTH_LONG).show()
         }
+
+        dangerPoints = list
+
         val mProvider = HeatmapTileProvider.Builder()
             .data(list)
             .build()
+
         // if you ever need the mOverlay then please set this variable
         // equal to this line
         mMap.addTileOverlay(TileOverlayOptions().tileProvider(mProvider))
     }
 
-    fun readItems(resource: Int): ArrayList<LatLng> {
+    fun readItems(array: JSONArray): ArrayList<LatLng> {
         val list = ArrayList<LatLng>()
-        val inputStream  = getResources().openRawResource(resource)
-        val json = Scanner(inputStream).useDelimiter("\\A").next()
-        val array = JSONArray(json)
         for (i in 0..array.length() - 1) {
             val coord = array.getJSONObject(i)
             val lat = coord.getDouble("lat")
