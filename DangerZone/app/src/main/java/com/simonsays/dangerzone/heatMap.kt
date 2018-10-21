@@ -101,7 +101,7 @@ class heatMap : AppCompatActivity(), OnMapReadyCallback {
 
     // create a method to make a push notification (vibration)
     fun pushNotification() : {
-        
+
     }
 
 
